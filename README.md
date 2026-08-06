@@ -6,3 +6,14 @@ open-source library with live demo / GitHub / npm links, plus the org-wide
 `devslab-kr.github.io` prefix.
 
 Live: **https://devslab-kr.github.io/**
+
+## Design
+
+The page shares [devslab.kr](https://devslab.kr)'s design language (see that
+site's repo for the reference implementation): zinc palette with a
+light/dark toggle (`localStorage 'theme'`, light default), electric cyan
+accent, Geist / Geist Mono webfonts, DevsLab logo mark + wordmark, dot-grid
+hero, mono `//` labels and `[NN]` card numbering. devslab.kr links back here
+from its header (`Open Source`) and footer. No external-link `↗` arrows —
+hover color/border carries the affordance. When one side's look changes,
+keep the other in sync.
