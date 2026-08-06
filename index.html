@@ -9,181 +9,417 @@
       content="devslab이 만드는 오픈소스 라이브러리들의 라이브 데모·문서 허브 — editor-ruler, ssrf-guard-js, numkey, kokey, vue-date-rail 그리고 Spring Boot 라이브러리."
     />
     <meta name="google-site-verification" content="nIGsjwN9PU78ZpydYp5q4blPGCHBaZZRuvVI8wsJREg" />
+    <meta property="og:title" content="devslab 오픈소스 — 라이브 데모 허브" />
+    <meta
+      property="og:description"
+      content="프로덕션에서 먼저 검증하고 커뮤니티에 공개하는 라이브러리들 — 라이브 데모·문서·npm·Maven 링크 한 곳에."
+    />
+    <meta property="og:url" content="https://devslab-kr.github.io/" />
+    <link rel="icon" href="https://devslab.kr/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Match devslab.kr: light by default, persisted 'theme' key wins.
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #f6f7f9;
-        --ink: #1f2328;
-        --muted: #5f6570;
-        --line: #d8dbe0;
+        /* Tailwind zinc scale + electric cyan — same tokens as devslab.kr */
+        --bg: #fafafa;            /* zinc-50 */
         --panel: #ffffff;
-        --accent: #2563eb;
-        --accent-soft: #dbe7fd;
+        --panel-soft: #fafafa;    /* chip bg (zinc-50) */
+        --ink: #18181b;           /* zinc-900 */
+        --body: #52525b;          /* zinc-600 */
+        --muted: #71717a;         /* zinc-500 */
+        --faint: #a1a1aa;         /* zinc-400 */
+        --line: #e4e4e7;          /* zinc-200 */
+        --line-strong: #d4d4d8;   /* zinc-300 */
+        --electric: #0891b2;      /* electric-600 */
+        --electric-strong: #0e7490; /* electric-700 */
+        --electric-raw: #06b6d4;  /* electric-500 */
+        --dot: rgb(0 0 0 / 0.08);
+        --header-bg: rgb(255 255 255 / 0.85);
+        color-scheme: light;
+      }
+      html.dark {
+        --bg: #09090b;            /* zinc-950 */
+        --panel: #18181b;         /* zinc-900 */
+        --panel-soft: #09090b;    /* zinc-950 */
+        --ink: #f4f4f5;           /* zinc-100 */
+        --body: #a1a1aa;          /* zinc-400 */
+        --muted: #71717a;         /* zinc-500 */
+        --faint: #52525b;         /* zinc-600 */
+        --line: #27272a;          /* zinc-800 */
+        --line-strong: #3f3f46;   /* zinc-700 */
+        --electric: #22d3ee;      /* electric-400 */
+        --electric-strong: #67e8f9; /* electric-300 */
+        --dot: rgb(255 255 255 / 0.08);
+        --header-bg: rgb(9 9 11 / 0.85);
+        color-scheme: dark;
       }
       * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
       body {
         margin: 0;
         background: var(--bg);
         color: var(--ink);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+        font-family: 'Geist', -apple-system, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
         line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
       }
-      a { color: var(--accent); text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-      header.top { border-bottom: 1px solid var(--line); background: var(--panel); }
-      .top-inner { display: flex; align-items: center; gap: 12px; padding: 14px 0; font-size: 14px; }
-      .top-inner strong { font-size: 16px; }
-      .top-links { margin-left: auto; display: flex; gap: 16px; }
-      .hero { padding: 48px 0 12px; }
-      .hero h1 { font-size: clamp(22px, 3.5vw, 30px); margin: 0 0 10px; }
-      .hero p { color: var(--muted); max-width: 46em; margin: 0 0 8px; }
-      section { padding: 26px 0; }
-      section h2 { font-size: 19px; margin: 0 0 14px; }
+      ::selection { background: #06b6d4; color: #ffffff; }
+      html.dark ::selection { background: #22d3ee; color: #0a0a0a; }
+      .mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+      a { color: inherit; text-decoration: none; }
+      a:focus-visible, button:focus-visible {
+        outline: 2px solid var(--electric-raw);
+        outline-offset: 2px;
+        border-radius: 6px;
+      }
+      .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
+      @media (min-width: 640px) { .wrap { padding: 0 1.5rem; } }
+
+      /* ---------- Header ---------- */
+      header.top {
+        position: sticky; top: 0; z-index: 50;
+        border-bottom: 1px solid var(--line);
+        background: var(--header-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .top-inner { display: flex; align-items: center; justify-content: space-between; padding: 1rem; }
+      @media (min-width: 640px) { .top-inner { padding: 1rem 1.5rem; } }
+      .brand { display: flex; align-items: center; gap: 0.625rem; }
+      .brand svg { width: 1.75rem; height: 1.75rem; color: var(--ink); flex: none; }
+      .brand .word { font-size: 1rem; font-weight: 600; letter-spacing: -0.025em; color: var(--ink); }
+      .brand .slash { font-size: 0.8125rem; color: var(--muted); }
+      .top-nav { display: flex; align-items: center; gap: 0.75rem; }
+      .top-nav a.nav-link {
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.875rem; color: var(--body);
+        transition: color 0.15s;
+      }
+      .top-nav a.nav-link:hover { color: var(--electric); }
+      @media (max-width: 519px) { .top-nav a.nav-link { display: none; } }
+      #theme-toggle {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 2.25rem; height: 2.25rem; border-radius: 0.375rem;
+        border: 1px solid var(--line-strong); background: var(--panel);
+        color: var(--body); cursor: pointer; transition: background 0.15s;
+      }
+      #theme-toggle:hover { background: var(--panel-soft); }
+      #theme-toggle svg { width: 1.25rem; height: 1.25rem; }
+      html:not(.dark) #icon-sun { display: none; }
+      html.dark #icon-moon { display: none; }
+
+      /* ---------- Hero ---------- */
+      .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+      .hero .dots {
+        pointer-events: none; position: absolute; inset: 0;
+        background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+        background-size: 24px 24px;
+        -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+        mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+      }
+      .hero-inner { position: relative; padding-top: 5rem; padding-bottom: 5rem; }
+      @media (min-width: 768px) { .hero-inner { padding-top: 6.5rem; padding-bottom: 6.5rem; } }
+      .eyebrow {
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.875rem; color: var(--electric); margin: 0 0 1.5rem;
+      }
+      .cursor {
+        display: inline-block; width: 0.375rem; height: 0.875rem;
+        transform: translateY(1px); margin-left: 0.25rem; vertical-align: middle;
+        background: var(--electric-raw);
+        animation: blink 1.1s steps(2) infinite;
+      }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      .hero h1 {
+        margin: 0 0 1.5rem; font-weight: 600; letter-spacing: -0.06em;
+        font-size: clamp(2.5rem, 6vw, 4.25rem); line-height: 1.05;
+      }
+      .hero h1 .accent { color: var(--electric); }
+      .hero .lede { max-width: 34em; margin: 0; font-size: 1.125rem; line-height: 1.75; color: var(--body); }
+
+      /* ---------- Sections ---------- */
+      section { padding: 3.5rem 0 1rem; }
+      section:last-of-type { padding-bottom: 4rem; }
+      .sec-head { margin-bottom: 2rem; }
+      .sec-head .eyebrow { margin-bottom: 0.75rem; }
+      .sec-head h2 {
+        margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em;
+      }
+      @media (min-width: 640px) { .sec-head h2 { font-size: 2rem; } }
+
       .grid {
-        display: grid; gap: 14px;
+        display: grid; gap: 1rem;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       }
       .card {
-        background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-        padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;
+        display: flex; flex-direction: column;
+        border: 1px solid var(--line); border-radius: 0.75rem;
+        background: var(--panel); padding: 1.5rem;
+        transition: border-color 0.15s, box-shadow 0.15s;
       }
-      .card h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-      .card p { margin: 0; font-size: 13.5px; color: var(--muted); flex: 1 1 auto; }
-      .card .links { display: flex; gap: 12px; font-size: 13px; flex-wrap: wrap; }
-      .emoji { font-size: 18px; }
-      footer { border-top: 1px solid var(--line); margin-top: 28px; padding: 24px 0 40px; color: var(--muted); font-size: 13.5px; }
-      footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+      .card:hover {
+        border-color: var(--electric-raw);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      html.dark .card:hover { border-color: #22d3ee; }
+      .card-top {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.25rem;
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.75rem;
+      }
+      .card-top .label { color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+      .card-top .num { color: var(--faint); }
+      .card h3 {
+        margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.025em;
+        font-family: 'Geist Mono', ui-monospace, monospace;
+      }
+      .card p {
+        flex: 1 1 auto; margin: 0.75rem 0 0;
+        font-size: 0.875rem; line-height: 1.65; color: var(--body);
+      }
+      .card .links { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 1.25rem; }
+      .chip {
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.75rem; color: var(--body);
+        border: 1px solid var(--line-strong); border-radius: 0.375rem;
+        background: var(--panel-soft); padding: 0.25rem 0.625rem;
+        transition: color 0.15s, border-color 0.15s;
+      }
+      .chip:hover { color: var(--electric-strong); border-color: var(--electric-raw); }
+      .chip-primary { color: var(--electric); border-color: var(--electric-raw); }
+
+      /* ---------- Footer ---------- */
+      footer {
+        border-top: 1px solid var(--line);
+        background: var(--panel);
+      }
+      .foot-inner {
+        display: flex; flex-direction: column; align-items: flex-start;
+        justify-content: space-between; gap: 1rem;
+        padding: 2rem 1rem; font-size: 0.875rem;
+      }
+      @media (min-width: 640px) {
+        .foot-inner { flex-direction: row; align-items: center; padding: 2rem 1.5rem; }
+      }
+      .foot-brand { display: flex; align-items: center; gap: 0.75rem; }
+      .foot-brand svg { width: 1.25rem; height: 1.25rem; color: var(--ink); }
+      .foot-brand span {
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.75rem; color: var(--muted);
+      }
+      .foot-links { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+      .foot-links a {
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 0.75rem; color: var(--body); transition: color 0.15s;
+      }
+      .foot-links a:hover { color: var(--electric); }
     </style>
   </head>
   <body>
     <header class="top">
       <div class="wrap top-inner">
-        <strong>devslab open source</strong>
-        <nav class="top-links">
-          <a href="https://github.com/devslab-kr">GitHub</a>
-          <a href="https://devslab.kr">devslab.kr</a>
+        <a href="https://devslab.kr" class="brand" aria-label="DevsLab">
+          <svg viewBox="0 0 32 32" aria-hidden="true" fill="currentColor">
+            <path d="M 4 4 L 28 4 L 28 12 L 20 12 L 20 28 L 4 28 Z" />
+          </svg>
+          <span class="word">DevsLab</span>
+          <span class="slash mono">/ open-source</span>
+        </a>
+        <nav class="top-nav">
+          <a class="nav-link" href="https://github.com/devslab-kr">github</a>
+          <a class="nav-link" href="https://devslab.kr">devslab.kr</a>
+          <button id="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+            <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </button>
         </nav>
       </div>
     </header>
 
-    <div class="wrap hero">
-      <h1>devslab 오픈소스 — 라이브 데모 허브</h1>
-      <p>저희 SaaS 프로덕션에서 먼저 검증하고 커뮤니티에 공개하는 라이브러리들입니다. 카드를 눌러 바로 만져보세요.</p>
-    </div>
-
-    <div class="wrap">
-      <section>
-        <h2>JavaScript / TypeScript (npm <code>@devslab</code>)</h2>
-        <div class="grid">
-          <div class="card">
-            <h3><span class="emoji">📏</span> editor-ruler</h3>
-            <p>웹 리치텍스트 에디터를 위한 Word 스타일 가로 줄자 — 여백·들여쓰기 드래그 핸들, 가이드선+스냅, 테이블 컬럼 마커. Froala · Tiptap · CKEditor 5 어댑터.</p>
-            <div class="links">
-              <a href="/editor-ruler/">라이브 데모</a>
-              <a href="https://github.com/devslab-kr/editor-ruler">GitHub</a>
-              <a href="https://www.npmjs.com/package/@devslab/editor-ruler">npm</a>
-            </div>
-          </div>
-          <div class="card">
-            <h3><span class="emoji">🛡️</span> ssrf-guard-js</h3>
-            <p>JS/TS SSRF 방어 — URL 정책 검증, 사설망 IP 차단, 리다이렉트 재검증, LLM 툴 입력 URL 가드. Node와 엣지 런타임 모두 지원.</p>
-            <div class="links">
-              <a href="/ssrf-guard-js/">문서</a>
-              <a href="https://github.com/devslab-kr/ssrf-guard-js">GitHub</a>
-              <a href="https://www.npmjs.com/package/@devslab/ssrf-guard-js">npm</a>
-            </div>
-          </div>
-          <div class="card">
-            <h3><span class="emoji">🔢</span> numkey</h3>
-            <p>"문자열인데 숫자"인 입력 필드의 모든 것 — 커서가 튀지 않는 천 단위 콤마, 한글 금액 병기(150만), 만/억 축약 입력. 금액 안전 문자열 모델.</p>
-            <div class="links">
-              <a href="/numkey/">라이브 데모</a>
-              <a href="https://github.com/devslab-kr/numkey">GitHub</a>
-              <a href="https://www.npmjs.com/package/@devslab/numkey">npm</a>
-            </div>
-          </div>
-          <div class="card">
-            <h3><span class="emoji">⌨️</span> kokey</h3>
-            <p>키보드 배열 오타 복원기 — 한글 두벌식 IME 오토마톤 내장, 러시아어·히브리어·태국어 등 7개 배열, 스크립트 자동 감지.</p>
-            <div class="links">
-              <a href="/kokey/">라이브 데모</a>
-              <a href="https://github.com/devslab-kr/kokey">GitHub</a>
-              <a href="https://www.npmjs.com/package/@devslab/kokey">npm</a>
-            </div>
-          </div>
-          <div class="card">
-            <h3><span class="emoji">📅</span> vue-date-rail</h3>
-            <p>Vue 3용 가로 무한 스크롤 날짜 레일 피커 — 배송·예약 앱의 캘린더 스트립 패턴. headless 코어 + Intl 기반 i18n.</p>
-            <div class="links">
-              <a href="/vue-date-rail/">라이브 데모</a>
-              <a href="https://github.com/devslab-kr/vue-date-rail">GitHub</a>
-              <a href="https://www.npmjs.com/package/@devslab/vue-date-rail">npm</a>
-            </div>
-          </div>
+    <main>
+      <section class="hero" style="padding: 0;">
+        <div class="dots" aria-hidden="true"></div>
+        <div class="wrap hero-inner">
+          <p class="eyebrow" dir="ltr">// open-source<span class="cursor"></span></p>
+          <h1>
+            devslab 오픈소스
+            <br />
+            <span class="accent">라이브 데모 허브</span>
+          </h1>
+          <p class="lede">
+            저희 SaaS 프로덕션에서 먼저 검증하고 커뮤니티에 공개하는 라이브러리들입니다.
+            카드를 눌러 바로 만져보세요.
+          </p>
         </div>
       </section>
 
-      <section>
-        <h2>JVM / Spring Boot (Maven Central <code>kr.devslab</code>)</h2>
-        <div class="grid">
-          <div class="card">
-            <h3><span class="emoji">🪶</span> easy-paging-spring-boot-starter</h3>
-            <p>어노테이션 기반 페이지네이션 — 오프셋(@AutoPaginate)과 키셋(@KeysetPaginate)을 한 스타터로. Spring Boot 4 활성 / 3.x 유지보수 라인.</p>
-            <div class="links">
-              <a href="https://github.com/devslab-kr/easy-paging-spring-boot-starter">GitHub</a>
-              <a href="https://central.sonatype.com/artifact/kr.devslab/easy-paging-spring-boot-starter">Maven</a>
-            </div>
+      <div class="wrap">
+        <section aria-labelledby="sec-js">
+          <div class="sec-head">
+            <p class="eyebrow" dir="ltr">// npm @devslab</p>
+            <h2 id="sec-js">JavaScript / TypeScript</h2>
           </div>
-          <div class="card">
-            <h3><span class="emoji">🛡️</span> ssrf-guard</h3>
-            <p>JVM SSRF 방어 — 9개 HTTP 클라이언트 모듈 + Spring AI/LangChain4j LLM 에이전트 툴 URL 검증.</p>
-            <div class="links">
-              <a href="https://github.com/devslab-kr/ssrf-guard">GitHub</a>
-              <a href="https://central.sonatype.com/artifact/kr.devslab/ssrf-guard">Maven</a>
-            </div>
+          <div class="grid">
+            <article class="card">
+              <div class="card-top"><span class="label">// editor ui</span><span class="num">[01]</span></div>
+              <h3>editor-ruler</h3>
+              <p>웹 리치텍스트 에디터를 위한 Word 스타일 가로 줄자 — 여백·들여쓰기 드래그 핸들, 가이드선+스냅, 테이블 컬럼 마커. Froala · Tiptap · CKEditor 5 어댑터.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="/editor-ruler/">라이브 데모</a>
+                <a class="chip" href="https://github.com/devslab-kr/editor-ruler">GitHub</a>
+                <a class="chip" href="https://www.npmjs.com/package/@devslab/editor-ruler">npm</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// security</span><span class="num">[02]</span></div>
+              <h3>ssrf-guard-js</h3>
+              <p>JS/TS SSRF 방어 — URL 정책 검증, 사설망 IP 차단, 리다이렉트 재검증, LLM 툴 입력 URL 가드. Node와 엣지 런타임 모두 지원.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="/ssrf-guard-js/">문서</a>
+                <a class="chip" href="https://github.com/devslab-kr/ssrf-guard-js">GitHub</a>
+                <a class="chip" href="https://www.npmjs.com/package/@devslab/ssrf-guard-js">npm</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// input</span><span class="num">[03]</span></div>
+              <h3>numkey</h3>
+              <p>"문자열인데 숫자"인 입력 필드의 모든 것 — 커서가 튀지 않는 천 단위 콤마, 한글 금액 병기(150만), 만/억 축약 입력. 금액 안전 문자열 모델.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="/numkey/">라이브 데모</a>
+                <a class="chip" href="https://github.com/devslab-kr/numkey">GitHub</a>
+                <a class="chip" href="https://www.npmjs.com/package/@devslab/numkey">npm</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// input</span><span class="num">[04]</span></div>
+              <h3>kokey</h3>
+              <p>키보드 배열 오타 복원기 — 한글 두벌식 IME 오토마톤 내장, 러시아어·히브리어·태국어 등 7개 배열, 스크립트 자동 감지.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="/kokey/">라이브 데모</a>
+                <a class="chip" href="https://github.com/devslab-kr/kokey">GitHub</a>
+                <a class="chip" href="https://www.npmjs.com/package/@devslab/kokey">npm</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// vue ui</span><span class="num">[05]</span></div>
+              <h3>vue-date-rail</h3>
+              <p>Vue 3용 가로 무한 스크롤 날짜 레일 피커 — 배송·예약 앱의 캘린더 스트립 패턴. headless 코어 + Intl 기반 i18n.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="/vue-date-rail/">라이브 데모</a>
+                <a class="chip" href="https://github.com/devslab-kr/vue-date-rail">GitHub</a>
+                <a class="chip" href="https://www.npmjs.com/package/@devslab/vue-date-rail">npm</a>
+              </div>
+            </article>
           </div>
-          <div class="card">
-            <h3><span class="emoji">📜</span> api-log</h3>
-            <p>이벤트 기반 API 로깅, PostgreSQL JSONB 저장 — core + JPA/R2DBC/MyBatis 드라이버.</p>
-            <div class="links">
-              <a href="https://github.com/devslab-kr/api-log">GitHub</a>
-              <a href="https://central.sonatype.com/artifact/kr.devslab/api-log-core">Maven</a>
-            </div>
+        </section>
+
+        <section aria-labelledby="sec-jvm">
+          <div class="sec-head">
+            <p class="eyebrow" dir="ltr">// maven central kr.devslab</p>
+            <h2 id="sec-jvm">JVM / Spring Boot</h2>
           </div>
-          <div class="card">
-            <h3><span class="emoji">🧰</span> devslab-kit</h3>
-            <p>Spring Boot 4 플랫폼 스타터 — 인증, RBAC+ABAC, 멀티테넌시, 동적 메뉴, 감사 로깅을 자동 구성으로.</p>
-            <div class="links">
-              <a href="https://devslab-kit.devslab.kr">문서</a>
-              <a href="https://github.com/devslab-kr/devslab-kit">GitHub</a>
-            </div>
+          <div class="grid">
+            <article class="card">
+              <div class="card-top"><span class="label">// pagination</span><span class="num">[06]</span></div>
+              <h3>easy-paging</h3>
+              <p>어노테이션 기반 페이지네이션 — 오프셋(@AutoPaginate)과 키셋(@KeysetPaginate)을 한 스타터로. Spring Boot 4 활성 / 3.x 유지보수 라인.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="https://easy-paging.devslab.kr">문서</a>
+                <a class="chip" href="https://github.com/devslab-kr/easy-paging-spring-boot-starter">GitHub</a>
+                <a class="chip" href="https://central.sonatype.com/artifact/kr.devslab/easy-paging-spring-boot-starter">Maven</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// security</span><span class="num">[07]</span></div>
+              <h3>ssrf-guard</h3>
+              <p>JVM SSRF 방어 — 9개 HTTP 클라이언트 모듈 + Spring AI/LangChain4j LLM 에이전트 툴 URL 검증.</p>
+              <div class="links">
+                <a class="chip" href="https://github.com/devslab-kr/ssrf-guard">GitHub</a>
+                <a class="chip" href="https://central.sonatype.com/artifact/kr.devslab/ssrf-guard">Maven</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// logging</span><span class="num">[08]</span></div>
+              <h3>api-log</h3>
+              <p>이벤트 기반 API 로깅, PostgreSQL JSONB 저장 — core + JPA/R2DBC/MyBatis 드라이버.</p>
+              <div class="links">
+                <a class="chip" href="https://github.com/devslab-kr/api-log">GitHub</a>
+                <a class="chip" href="https://central.sonatype.com/artifact/kr.devslab/api-log-core">Maven</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// platform starter</span><span class="num">[09]</span></div>
+              <h3>devslab-kit</h3>
+              <p>Spring Boot 4 플랫폼 스타터 — 인증, RBAC+ABAC, 멀티테넌시, 동적 메뉴, 감사 로깅을 자동 구성으로.</p>
+              <div class="links">
+                <a class="chip chip-primary" href="https://devslab-kit.devslab.kr">문서</a>
+                <a class="chip" href="https://github.com/devslab-kr/devslab-kit">GitHub</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// data migration</span><span class="num">[10]</span></div>
+              <h3>datalinq</h3>
+              <p>컨벤션 기반 크로스 벤더 JDBC 데이터 마이그레이션 TUI — sql/ 폴더를 넣으면 메뉴가 생깁니다. jbang으로 설치.</p>
+              <div class="links">
+                <a class="chip" href="https://github.com/devslab-kr/datalinq">GitHub</a>
+                <a class="chip" href="https://github.com/devslab-kr/datalinq/releases/latest">Releases</a>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-top"><span class="label">// demos</span><span class="num">[11]</span></div>
+              <h3>devslab-examples</h3>
+              <p>위 라이브러리들의 실행 가능한 Spring Boot 데모 19종 — clone, bootRun, curl. 커뮤니티 Discussions도 여기서.</p>
+              <div class="links">
+                <a class="chip" href="https://github.com/devslab-kr/devslab-examples">GitHub</a>
+                <a class="chip" href="https://github.com/devslab-kr/devslab-examples/discussions">Discussions</a>
+              </div>
+            </article>
           </div>
-          <div class="card">
-            <h3><span class="emoji">🔌</span> datalinq</h3>
-            <p>컨벤션 기반 크로스 벤더 JDBC 데이터 마이그레이션 TUI — sql/ 폴더를 넣으면 메뉴가 생깁니다. jbang으로 설치.</p>
-            <div class="links">
-              <a href="https://github.com/devslab-kr/datalinq">GitHub</a>
-              <a href="https://github.com/devslab-kr/datalinq/releases/latest">Releases</a>
-            </div>
-          </div>
-          <div class="card">
-            <h3><span class="emoji">🧪</span> devslab-examples</h3>
-            <p>위 라이브러리들의 실행 가능한 Spring Boot 데모 19종 — clone, bootRun, curl. 커뮤니티 Discussions도 여기서.</p>
-            <div class="links">
-              <a href="https://github.com/devslab-kr/devslab-examples">GitHub</a>
-              <a href="https://github.com/devslab-kr/devslab-examples/discussions">Discussions</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </main>
 
     <footer>
-      <div class="wrap">
-        <span>© <a href="https://devslab.kr">devslab</a> · Built in Seoul</span>
-        <a href="https://github.com/devslab-kr">github.com/devslab-kr</a>
+      <div class="wrap foot-inner">
+        <div class="foot-brand">
+          <svg viewBox="0 0 32 32" aria-hidden="true" fill="currentColor">
+            <path d="M 4 4 L 28 4 L 28 12 L 20 12 L 20 28 L 4 28 Z" />
+          </svg>
+          <span id="copyright">© 2026 DevsLab · Built in Seoul</span>
+        </div>
+        <div class="foot-links" dir="ltr">
+          <a href="https://devslab.kr">devslab.kr</a>
+          <a href="https://github.com/devslab-kr">github.com/devslab.kr</a>
+        </div>
       </div>
     </footer>
+
+    <script>
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+      });
+      document.getElementById('copyright').textContent =
+        '© ' + new Date().getFullYear() + ' DevsLab · Built in Seoul';
+    </script>
   </body>
 </html>
