@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
-import { cp, lstat, mkdir, readFile, readdir, realpath, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { replaceDirectoryAtomically, verifyProjectZipFile, verifyTreeAgainstManifest } from './oss-brand-sync-lib.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifestPath = join(root, 'scripts', 'oss-brand-v0.1.1.manifest.json');
@@ -22,41 +23,18 @@ function overlaps(left, right) {
   return relation === '' || (!relation.startsWith('..' + sep) && relation !== '..' && !relation.includes('..' + sep));
 }
 
-async function listFiles(directory, prefix = '') {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files = [];
-  for (const entry of entries) {
-    const relativePath = prefix + entry.name;
-    const fullPath = join(directory, entry.name);
-    const status = await lstat(fullPath);
-    if (status.isSymbolicLink() || (!status.isFile() && !status.isDirectory())) {
-      throw new Error('Brand source contains a symlink, junction, or unsupported entry: ' + relativePath);
-    }
-    if (status.isDirectory()) files.push(...await listFiles(fullPath, relativePath + '/'));
-    else files.push(relativePath);
-  }
-  return files.sort();
-}
-
 async function verifyChecksums(source, manifest) {
-  const sourceFiles = await listFiles(source);
-  const expected = manifest.files.map((file) => file.path).sort();
-  if (JSON.stringify(sourceFiles) !== JSON.stringify(expected)) {
-    throw new Error('Pinned OSS brand source has extra, missing, or renamed files');
-  }
-  for (const file of manifest.files) {
-    assertSafeRelative(file.path);
-    const contents = await readFile(join(source, file.path));
-    if (hash(contents) !== file.sha256) throw new Error('Checksum mismatch: ' + file.path);
-  }
+  await verifyTreeAgainstManifest(source, manifest);
 
   const zipChecksums = await readFile(join(source, 'downloads', 'SHA256SUMS.txt'), 'utf8');
   for (const line of zipChecksums.trim().split(/\r?\n/)) {
     const [expectedHash, file] = line.trim().split(/\s{2,}/);
     assertSafeRelative('downloads/' + file);
-    if (hash(await readFile(join(source, 'downloads', file))) !== expectedHash) {
+    const zipPath = join(source, 'downloads', file);
+    if (hash(await readFile(zipPath)) !== expectedHash) {
       throw new Error('Release ZIP checksum mismatch: ' + file);
     }
+    await verifyProjectZipFile(zipPath, file.replace(/\.zip$/, ''));
   }
 
   const projects = manifest.files.map((file) => file.path.split('/')[0])
@@ -94,14 +72,14 @@ await rm(stage, { recursive: true, force: true });
 await mkdir(stage, { recursive: true });
 try {
   await cp(source, stage, { recursive: true, verbatimSymlinks: true, errorOnExist: true });
+  await verifyChecksums(stage, manifest);
   await writeFile(join(stage, 'snapshot.json'), JSON.stringify({
     version: manifest.version,
     source: manifest.source,
     files: manifest.files,
   }, null, 2) + '\n');
-  await rm(resolvedTarget, { recursive: true, force: true });
   await mkdir(dirname(resolvedTarget), { recursive: true });
-  await rename(stage, resolvedTarget);
+  await replaceDirectoryAtomically(stage, resolvedTarget);
   console.log('Synced ' + manifest.files.length + ' checksum-verified OSS brand files from v' + manifest.version + '.');
 } catch (error) {
   await rm(stage, { recursive: true, force: true });
