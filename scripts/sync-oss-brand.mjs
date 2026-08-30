@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { replaceDirectoryAtomically, verifyProjectZipFile, verifyTreeAgainstManifest } from './oss-brand-sync-lib.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const manifestPath = join(root, 'scripts', 'oss-brand-v0.1.1.manifest.json');
+const manifestPath = join(root, 'scripts', 'oss-brand-v0.2.0.manifest.json');
 const target = join(root, 'assets', 'oss-brand');
 
 function hash(buffer) {
@@ -57,8 +57,8 @@ async function verifyChecksums(source, manifest) {
 }
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-if (manifest.version !== '0.1.1' || manifest.files.length !== 292) {
-  throw new Error('Expected immutable OSS brand v0.1.1 manifest with 292 files');
+if (manifest.version !== '0.2.0' || manifest.files.length !== 305) {
+  throw new Error('Expected immutable OSS Q-line brand v0.2.0 manifest with 305 files');
 }
 const source = await realpath(manifest.source);
 const resolvedTarget = resolve(target);
