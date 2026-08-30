@@ -11,11 +11,11 @@ import { readZipEntries, replaceDirectoryAtomically, verifyProjectZip, verifyTre
 const root = fileURLToPath(new URL('..', import.meta.url));
 const snapshotPath = join(root, 'assets', 'oss-brand', 'snapshot.json');
 
-test('vendors the pinned 0.1.1 OSS brand snapshot with all 292 verified files', () => {
+test('vendors the pinned 0.2.0 OSS Q-line brand snapshot with all 305 verified files', () => {
   assert.ok(existsSync(snapshotPath), 'snapshot metadata must exist');
   const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8'));
-  assert.equal(snapshot.version, '0.1.1');
-  assert.equal(snapshot.files.length, 292);
+  assert.equal(snapshot.version, '0.2.0');
+  assert.equal(snapshot.files.length, 305);
   for (const file of snapshot.files) {
     const target = join(root, 'assets', 'oss-brand', file.path);
     assert.ok(existsSync(target), `${file.path} must be vendored`);
