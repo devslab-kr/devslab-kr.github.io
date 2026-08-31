@@ -10,9 +10,9 @@ Live: **https://devslab-kr.github.io/**
 ## OSS brand snapshot
 
 This hub vendors the public DevsLab OSS brand release rather than consuming it
-at runtime. The pinned Q-line snapshot is **v0.2.0**, represented by the immutable
+at runtime. The pinned Q-line snapshot is **v0.3.0**, represented by the immutable
 305-file SHA-256 manifest at
-**scripts/oss-brand-v0.2.0.manifest.json**. Run **npm run sync:brand** to
+**scripts/oss-brand-v0.3.0.manifest.json**. Run **npm run sync:brand** to
 verify the source release, every project checksum, and release ZIP checksum
 before the local snapshot is replaced. Generated content under
 **assets/oss-brand/** must only change through that command.

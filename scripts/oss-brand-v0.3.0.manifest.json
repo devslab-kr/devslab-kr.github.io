@@ -1,6 +1,7 @@
 {
   "version": "0.3.0",
   "source": "/home/user/oss-brand/dist",
+  "sourceCommit": "f935d6c144b26afb89a40cd29b44e31e9109f071",
   "files": [
     {
       "path": "api-log/apple-touch-icon.png",
