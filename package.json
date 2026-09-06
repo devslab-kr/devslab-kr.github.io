@@ -5,7 +5,11 @@
   "scripts": {
     "generate:brand-manifest": "node scripts/generate-oss-brand-manifest.mjs",
     "sync:brand": "node scripts/sync-oss-brand.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "serve": "node scripts/serve.mjs"
+    "test": "node scripts/build-publisher.mjs --check && node --test tests/*.test.mjs",
+    "serve": "node scripts/serve.mjs",
+    "build:publisher": "node scripts/build-publisher.mjs"
+  },
+  "devDependencies": {
+    "@devslab/site-kit": "0.8.0"
   }
 }
