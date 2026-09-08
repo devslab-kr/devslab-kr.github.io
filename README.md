@@ -7,26 +7,23 @@ open-source library with live demo / GitHub / npm links, plus the org-wide
 
 Live: **https://devslab-kr.github.io/**
 
-## GitLinq product page
+## GitLinq address compatibility
 
-`gitlinq/index.html` publishes **https://devslab-kr.github.io/gitlinq/** as a
-standalone Korean/English Windows product page. It uses the hub's persisted
-`theme` and `hub-lang` preferences; unsupported language preferences are kept
-and displayed in English on this page. The home-page product card has all
-fourteen hub translations and is separate from the OSS registry.
+GitLinq product information and its Korean beginner guide now live on the
+company website: **https://devslab.kr/products/gitlinq/** and
+**https://devslab.kr/products/gitlinq/docs/**. The OSS hub home page remains
+focused on open-source projects.
 
-GitLinq product source is private. Public downloads come from
+The former `/gitlinq/` and `/gitlinq/docs/` addresses contain move notices.
+Their JavaScript redirects preserve URL fragments; a no-script meta refresh
+and a visible link keep the company destinations reachable without JavaScript.
+Canonical URLs point to the company pages, and the redirects are excluded from
+this hub's sitemap.
+
+The former `assets/gitlinq/` files and release-selector tests remain for cached
+page compatibility. Public binary downloads still come from
 [`devslab-kr/gitlinq-releases`](https://github.com/devslab-kr/gitlinq-releases).
-`assets/gitlinq/release.js` reads its latest published release without
-credentials, selects the exact version's Windows x64 installer and portable
-ZIP, and accepts only matching GitHub asset URLs. If the API or an asset is
-unavailable, the links remain usable through the public Release page.
-No version number or direct asset URL needs to be updated for each release.
-
-The product illustration is HTML with synthetic content, not a user screenshot.
-GitLinq assets are separate from the generated OSS brand snapshot. `site-kit`
-continues to own only the existing publisher metadata block on the home page.
-Run `npm test`; use `npm run serve` to preview both `/` and `/gitlinq/`.
+Run `npm test` to check the hub, redirects, and retained download selection.
 
 ## OSS brand snapshot
 
