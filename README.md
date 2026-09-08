@@ -7,6 +7,27 @@ open-source library with live demo / GitHub / npm links, plus the org-wide
 
 Live: **https://devslab-kr.github.io/**
 
+## GitLinq product page
+
+`gitlinq/index.html` publishes **https://devslab-kr.github.io/gitlinq/** as a
+standalone Korean/English Windows product page. It uses the hub's persisted
+`theme` and `hub-lang` preferences; unsupported language preferences are kept
+and displayed in English on this page. The home-page product card has all
+fourteen hub translations and is separate from the OSS registry.
+
+GitLinq product source is private. Public downloads come from
+[`devslab-kr/gitlinq-releases`](https://github.com/devslab-kr/gitlinq-releases).
+`assets/gitlinq/release.js` reads its latest published release without
+credentials, selects the exact version's Windows x64 installer and portable
+ZIP, and accepts only matching GitHub asset URLs. If the API or an asset is
+unavailable, the links remain usable through the public Release page.
+No version number or direct asset URL needs to be updated for each release.
+
+The product illustration is HTML with synthetic content, not a user screenshot.
+GitLinq assets are separate from the generated OSS brand snapshot. `site-kit`
+continues to own only the existing publisher metadata block on the home page.
+Run `npm test`; use `npm run serve` to preview both `/` and `/gitlinq/`.
+
 ## OSS brand snapshot
 
 This hub vendors the public DevsLab OSS brand release rather than consuming it

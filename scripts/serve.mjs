@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +8,8 @@ const types = { '.css': 'text/css', '.html': 'text/html', '.ico': 'image/x-icon'
 const port = Number(process.env.PORT || 4173);
 createServer((request, response) => {
   const pathname = new URL(request.url, 'http://' + request.headers.host).pathname;
-  const candidate = normalize(join(root, pathname === '/' ? 'index.html' : pathname));
+  let candidate = normalize(join(root, pathname === '/' ? 'index.html' : pathname));
+  if (candidate.startsWith(root) && existsSync(candidate) && statSync(candidate).isDirectory()) candidate = join(candidate, 'index.html');
   if (!candidate.startsWith(root) || !existsSync(candidate)) {
     response.writeHead(404); response.end('Not found'); return;
   }
