@@ -2,6 +2,13 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5WGTTWSF');</script>
+    <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>데브스랩(DevsLab) 오픈소스 — 라이브 데모 허브</title>
     <meta
@@ -324,6 +331,10 @@
     </style>
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5WGTTWSF"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <header class="top">
       <div class="wrap top-inner">
         <a href="https://devslab.kr" class="brand" aria-label="DevsLab">
@@ -541,6 +552,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://devslab-kr.github.io/#website","name":"데브스랩 오픈소스","alternateName":["DevsLab Open Source","devslab open source"],"url":"https://devslab-kr.github.io/","publisher":{"@id":"https://devslab.kr/#organization"}}</script>
 <!-- publisher:end -->
           <a href="https://github.com/devslab-kr">github.com/devslab.kr</a>
+          <a id="privacy-link" href="https://devslab.kr/privacy/">개인정보처리방침</a>
         </div>
       </div>
     </footer>
@@ -596,6 +608,18 @@
             'pt-BR': 'Open source por DevsLab', fr: 'Open source par DevsLab', de: 'Open Source von DevsLab',
             es: 'Código abierto por DevsLab', ar: 'مصدر مفتوح من DevsLab'
           })[lang];
+          // The company policy (devslab.kr/privacy) covers this hub too. Its
+          // label follows devslab.kr's footer; ?lang= carries the reader's
+          // language across (devslab.kr shows Korean, or English otherwise).
+          var privacy = document.getElementById('privacy-link');
+          privacy.textContent = ({
+            ko: '개인정보처리방침', en: 'Privacy Policy', ja: 'プライバシーポリシー',
+            'zh-HK': '私隱政策', 'zh-TW': '隱私權政策', hi: 'गोपनीयता नीति',
+            vi: 'Chính sách quyền riêng tư', id: 'Kebijakan Privasi', th: 'นโยบายความเป็นส่วนตัว',
+            'pt-BR': 'Política de Privacidade', fr: 'Politique de confidentialité', de: 'Datenschutzerklärung',
+            es: 'Política de privacidad', ar: 'سياسة الخصوصية'
+          })[lang];
+          privacy.href = 'https://devslab.kr/privacy/?lang=' + encodeURIComponent(lang);
           setAll('[data-i18n="live"]', t.live);
           setAll('[data-i18n="docs"]', t.docs);
           for (var key in t.cards) {
