@@ -31,6 +31,24 @@
  *   - any [data-consent-settings] element, or a link to #cookie-settings,
  *     reopens the dialog to change or withdraw.
  *
+ * The AskLinq chat launcher (getasklinq.app/embed.js, on every Next page of
+ * devslab.kr) is a fixed div in the bottom-right corner, styled inline at
+ * z-index 2147483647, above anything here; at phone and tablet widths it sat
+ * on the bar's third choice and took its taps. Found by that z-index (the
+ * embed gives it no class), with !important because only that beats an
+ * inline style, the launcher:
+ *
+ *   - rises above the bar while the bar is up (--dlc-bar-space, the bar's
+ *     height plus 32px), and an open chat panel shrinks to fit above it;
+ *   - is hidden while the settings dialog is open (the dialog is modal);
+ *   - keeps its corner otherwise, and below 38rem the "saved" toast stops
+ *     short of it (7rem: the widest launcher labels, "Pergunte" and
+ *     "Question", make it 88px wide).
+ *
+ * At 768px and up the three choices start 28px down their column, clear of
+ * the bar's ✕, which shares that corner (Arabic copy is short enough there
+ * for the ✕ to reach the third button otherwise).
+ *
  * Text follows <html lang> (and dir) as the page changes it, and the tone
  * (light/dark) follows the page. Korean copy gets the same two line-break
  * guards as the rest of devslab.kr (glueKorean): a closing bracket stays with
@@ -78,7 +96,7 @@ const STYLE = `
 @media (min-width:768px){
 .dlc-bar{padding:20px 24px}
 .dlc-bar-inner{grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:24px}
-.dlc-actions{grid-template-columns:repeat(3,minmax(7.5rem,1fr))}
+.dlc-actions{grid-template-columns:repeat(3,minmax(7.5rem,1fr));margin-block-start:28px}
 .dlc-bar .dlc-copy{padding-inline-end:24px}
 }
 .dlc-overlay{position:fixed;inset:0;z-index:2147483001;display:grid;place-items:center;padding:16px;background:rgba(9,9,11,.55)}
@@ -104,6 +122,10 @@ const STYLE = `
 @container (min-width:32rem){.dlc-foot{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .dlc-toast{position:fixed;z-index:2147483002;bottom:16px;inset-inline:16px;max-width:24rem;margin-inline:auto;padding:10px 16px;border:1px solid var(--dlc-line);border-radius:10px;background:var(--dlc-bg);box-shadow:var(--dlc-shadow);font-weight:500;text-align:center}
 .dlc-toast:empty{display:none}
+body>div[style*="2147483647"]{bottom:var(--dlc-bar-space,16px)!important}
+body>div[style*="2147483647"]>iframe{max-height:calc(100vh - var(--dlc-bar-space,16px) - 80px);max-height:calc(100dvh - var(--dlc-bar-space,16px) - 80px)}
+body:has(>.dlc-overlay)>div[style*="2147483647"]{visibility:hidden!important}
+@media (max-width:38rem){body:has(>div[style*="2147483647"])>.dlc-toast{right:7rem}}
 @media (prefers-reduced-motion:reduce){.dlc *{transition:none!important}}
 @media print{.dlc{display:none!important}}
 `;
