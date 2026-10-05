@@ -1,24 +1,33 @@
 /**
  * The cookie consent bar and its settings dialog, framework-free.
  *
+ * The bar is short (owner decision 2026-10-06, DDS D-034): a title, one or
+ * two sentences — what is collected, why, that it is optional — and a
+ * "자세히 보기 / Learn more" link to the privacy policy's section on analytics
+ * and its overseas transfer (`learnMoreHref`, required, with its #anchor:
+ * that section carries the full disclosure the bar no longer repeats).
+ *
  * Below 35rem the three choices stack in one column, still equal in size, so
  * no language has to break a label mid-word (German, Spanish, Portuguese,
- * Hindi at 390px); from 35rem they sit in one row — the bar by viewport
- * width, the dialog footer by the dialog's own width (a container query).
+ * Hindi at 390px); from 35rem they sit in one row. The dialog's two buttons
+ * decide by the dialog's own width (a container query): side by side from
+ * 32rem, stacked below it. A label wraps only at a space.
  *
  * Behaviour comes from @devslab/site-kit's createConsentManager (D-034):
  * nothing that contacts Google runs until the visitor grants analytics for
  * the current policy version. This file is only the markup the kit leaves to
  * a non-Solid site, written once so every page of devslab.kr (the Next.js
  * pages and the static ones under public/) and the open-source hub draw the
- * same bar:
+ * same bar, laid out like the kit's own ConsentBanner:
  *
  *   - three equal choices — accept all, reject, settings — same element,
  *     same size, same style; ✕ and Escape close the bar without a decision;
- *   - the settings dialog shows "necessary" as text and "analytics" as a
- *     switch that starts unticked (ticked only when already granted), traps
- *     focus, focuses the switch first, closes on Escape without saving and
- *     gives focus back to whatever opened it;
+ *   - the settings dialog shows "necessary" as one line with an "always on"
+ *     badge and "analytics" as one line with a switch that starts unticked
+ *     (ticked only when already granted), then a link to the privacy policy
+ *     and two equal buttons: cancel (close without saving, like ✕ and
+ *     Escape) and save. It traps focus, focuses the switch first and gives
+ *     focus back to whatever opened it;
  *   - any [data-consent-settings] element, or a link to #cookie-settings,
  *     reopens the dialog to change or withdraw.
  *
@@ -37,8 +46,11 @@ const KOREAN_GLUE = /[)\]”’][가-힣]+|(?<=[가-힣])·(?=[\p{L}\p{N}])/gu;
 const RTL = new Set(['ar']);
 const STYLE_ID = 'dl-consent-style';
 const ROOT_KEY = '__dlConsentUI';
+// The kit's ConsentBanner rule: a path, then exactly one non-empty #anchor.
+const LEARN_MORE_HREF = /^[^#\s]*#[^#\s]+$/;
 
 const STYLE = `
+:where(body){padding-bottom:var(--dlc-bar-space,0px)}
 .dlc,.dlc *{box-sizing:border-box}
 .dlc{--dlc-bg:#fff;--dlc-fg:#18181b;--dlc-muted:#52525b;--dlc-line:#e4e4e7;--dlc-soft:#f4f4f5;--dlc-btn:#fff;--dlc-btn-line:#d4d4d8;--dlc-accent:#0891b2;--dlc-ring:#06b6d4;--dlc-track:#d4d4d8;--dlc-shadow:0 10px 30px rgba(9,9,11,.12);font-size:14px;line-height:1.6;font-family:inherit;font-weight:400;color:var(--dlc-fg);text-align:start;letter-spacing:normal}
 .dlc[data-tone=dark]{--dlc-bg:#18181b;--dlc-fg:#f4f4f5;--dlc-muted:#a1a1aa;--dlc-line:#3f3f46;--dlc-soft:#27272a;--dlc-btn:#18181b;--dlc-btn-line:#52525b;--dlc-accent:#22d3ee;--dlc-ring:#22d3ee;--dlc-track:#52525b;--dlc-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -46,6 +58,7 @@ const STYLE = `
 .dlc .ko-nobr{white-space:nowrap}
 .dlc .ko-dot::after{content:"\\2060"}
 .dlc[hidden],.dlc [hidden]{display:none!important}
+.dlc-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .dlc-bar{position:fixed;z-index:2147483000;inset-inline:16px;bottom:16px;max-width:64rem;margin-inline:auto;background:var(--dlc-bg);border:1px solid var(--dlc-line);border-radius:12px;box-shadow:var(--dlc-shadow);padding:16px}
 .dlc-bar-inner{display:grid;gap:12px}
 .dlc-copy{padding-inline-end:32px;min-width:0}
@@ -69,24 +82,26 @@ const STYLE = `
 .dlc-bar .dlc-copy{padding-inline-end:24px}
 }
 .dlc-overlay{position:fixed;inset:0;z-index:2147483001;display:grid;place-items:center;padding:16px;background:rgba(9,9,11,.55)}
-.dlc-dialog{position:relative;display:flex;flex-direction:column;width:100%;max-width:40rem;container-type:inline-size;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);background:var(--dlc-bg);border:1px solid var(--dlc-line);border-radius:12px;box-shadow:var(--dlc-shadow)}
-.dlc-head{position:relative;padding:20px 56px 12px 24px;padding-inline:24px 56px;border-bottom:1px solid var(--dlc-line)}
+.dlc-dialog{position:relative;display:flex;flex-direction:column;width:100%;max-width:36rem;container-type:inline-size;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);background:var(--dlc-bg);border:1px solid var(--dlc-line);border-radius:12px;box-shadow:var(--dlc-shadow)}
+.dlc-head{position:relative;padding:20px 24px 12px}
 .dlc-head .dlc-x{top:14px;inset-inline-end:12px}
-.dlc-h{margin:0;font-size:17px;font-weight:600;line-height:1.4;color:var(--dlc-fg)}
-.dlc-content{display:grid;gap:12px;padding:16px 24px;overflow-y:auto}
-.dlc-cat{display:grid;gap:6px;padding:14px 16px;border:1px solid var(--dlc-line);border-radius:10px}
-.dlc-cat-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:28px}
+.dlc-h{margin:0 0 4px;padding-inline-end:32px;font-size:17px;font-weight:600;line-height:1.4;color:var(--dlc-fg)}
+.dlc-content{display:grid;gap:16px;padding:4px 24px 16px;overflow-y:auto}
+.dlc-cats{display:grid;margin:0;padding:0;list-style:none}
+.dlc-cat{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;min-height:56px;padding:12px 0;border-top:1px solid var(--dlc-line)}
+.dlc-cat:last-child{border-bottom:1px solid var(--dlc-line)}
+.dlc-cat-copy{display:grid;gap:2px;min-width:0}
 .dlc-h3{margin:0;font-size:14px;font-weight:600;line-height:1.4;color:var(--dlc-fg)}
-.dlc-status{font-size:13px;font-weight:600;color:var(--dlc-muted)}
-.dlc-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--dlc-fg)}
+.dlc-status{display:inline-flex;align-items:center;min-height:24px;padding:2px 10px;border-radius:999px;background:var(--dlc-soft);font-size:12px;font-weight:600;line-height:1.3;color:var(--dlc-muted);white-space:nowrap}
+.dlc-switch{display:inline-flex;align-items:center;cursor:pointer}
 .dlc-switch input{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;opacity:0}
 .dlc-track{position:relative;flex:none;width:44px;height:24px;border-radius:999px;background:var(--dlc-track);transition:background-color .15s}
 .dlc-track::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
 .dlc-switch input:checked+.dlc-track{background:var(--dlc-accent)}
 .dlc-switch input:checked+.dlc-track::after{transform:translateX(20px)}
 .dlc[dir=rtl] .dlc-switch input:checked+.dlc-track::after{transform:translateX(-20px)}
-.dlc-foot{padding:12px 24px 20px;border-top:1px solid var(--dlc-line)}
-@container (min-width:35rem){.dlc-foot{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.dlc-foot{padding:16px 24px 20px;border-top:1px solid var(--dlc-line)}
+@container (min-width:32rem){.dlc-foot{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .dlc-toast{position:fixed;z-index:2147483002;bottom:16px;inset-inline:16px;max-width:24rem;margin-inline:auto;padding:10px 16px;border:1px solid var(--dlc-line);border-radius:10px;background:var(--dlc-bg);box-shadow:var(--dlc-shadow);font-weight:500;text-align:center}
 .dlc-toast:empty{display:none}
 @media (prefers-reduced-motion:reduce){.dlc *{transition:none!important}}
@@ -135,6 +150,20 @@ export function setGluedText(element, text, lang) {
   flush();
 }
 
+/**
+ * The bar's "learn more" target, checked the way the kit's ConsentBanner
+ * checks it: the policy section on analytics and its overseas transfer,
+ * anchor included. Throws RangeError otherwise.
+ */
+export function checkLearnMoreHref(href) {
+  if (typeof href !== 'string' || !LEARN_MORE_HREF.test(href)) {
+    throw new RangeError(
+      `mountConsentUI: learnMoreHref must link to the privacy policy's analytics section with its #anchor (e.g. /privacy#analytics), got ${JSON.stringify(href)}`,
+    );
+  }
+  return href;
+}
+
 function parseRgb(value) {
   const match = /rgba?\(([^)]+)\)/.exec(value || '');
   if (!match) return null;
@@ -164,17 +193,30 @@ function pageTone(doc) {
  * @param {{
  *   manager: ReturnType<typeof import('@devslab/site-kit').createConsentManager>,
  *   messagesFor: (lang: string) => { lang: string, messages: Record<string, string> },
+ *   learnMoreHref: string | ((lang: string) => string),
  *   privacyHref: (lang: string) => string,
  *   footerTrigger?: boolean,
  * }} options  `messagesFor`: strings for a document language (messages.mjs).
- *   `footerTrigger`: on pages whose footer has no cookie-settings
- *   control of its own (static HTML), add one after the footer's last link.
+ *   `learnMoreHref`: the bar's "learn more" link — the privacy policy's
+ *   section on analytics and its overseas transfer, with its #anchor
+ *   (required; RangeError without one, checked before anything runs).
+ *   `privacyHref`: the settings dialog's link to the privacy policy.
+ *   `footerTrigger`: on pages whose footer has no cookie-settings control of
+ *   its own (static HTML), add one after the footer's last link.
  */
 export function mountConsentUI(options) {
   const win = window;
   if (win[ROOT_KEY]) return win[ROOT_KEY];
   const doc = win.document;
   const { manager, messagesFor, privacyHref } = options;
+  const learnMoreHref =
+    typeof options.learnMoreHref === 'function' ? options.learnMoreHref : () => options.learnMoreHref;
+
+  let current = messagesFor(doc.documentElement.lang);
+  // Before the manager starts: a page wired without a policy anchor fails
+  // loudly (and loads nothing) instead of showing a bar that hides the
+  // disclosure.
+  checkLearnMoreHref(learnMoreHref(current.lang));
 
   manager.start();
 
@@ -185,7 +227,6 @@ export function mountConsentUI(options) {
     doc.head.appendChild(style);
   }
 
-  let current = messagesFor(doc.documentElement.lang);
   let bar = null;
   let overlay = null;
   let toast = null;
@@ -209,10 +250,7 @@ export function mountConsentUI(options) {
     node.dataset.tone = pageTone(doc);
     return node;
   };
-  const privacyLink = () => {
-    const link = el('a', 'dlc-link', { href: privacyHref(current.lang) });
-    return text(link, current.messages.privacyLink);
-  };
+  const link = (href, label) => text(el('a', 'dlc-link', { href }), label);
   const button = (label, onClick, className = 'dlc-btn') => {
     const node = el('button', className, { type: 'button' });
     text(node, label);
@@ -256,7 +294,7 @@ export function mountConsentUI(options) {
     const copy = el('div', 'dlc-copy');
     copy.appendChild(text(el('p', 'dlc-title'), m.title));
     const body = text(el('p', 'dlc-body'), m.body);
-    body.append(' ', privacyLink());
+    body.append(' ', link(checkLearnMoreHref(learnMoreHref(current.lang)), m.learnMore));
     copy.appendChild(body);
     const actions = el('div', 'dlc-actions');
     actions.append(
@@ -275,12 +313,29 @@ export function mountConsentUI(options) {
     return section;
   };
 
+  // While the bar floats over the bottom of the page, the page gets that much
+  // room below its own end (like the kit's --site-consent-block-size), so the
+  // last lines — the footer's privacy link among them — can scroll clear of it.
+  let barSpace = null;
+  const reserveSpace = (node) => {
+    barSpace?.disconnect();
+    barSpace = null;
+    const root = doc.documentElement;
+    if (!node || typeof win.ResizeObserver !== 'function') {
+      root.style.removeProperty('--dlc-bar-space');
+      return;
+    }
+    barSpace = new win.ResizeObserver(() => root.style.setProperty('--dlc-bar-space', `${Math.ceil(node.offsetHeight) + 32}px`));
+    barSpace.observe(node);
+  };
+
   const syncBar = () => {
     const ask = manager.needsDecision() && !manager.dismissed();
     if (!ask) {
       if (bar) {
         bar.remove();
         bar = null;
+        reserveSpace(null);
       }
       return;
     }
@@ -289,6 +344,7 @@ export function mountConsentUI(options) {
     // First in <body>, so keyboard users reach it before the page.
     else doc.body.insertBefore(next, doc.body.firstChild);
     bar = next;
+    reserveSpace(next);
   };
 
   // ── the settings dialog ────────────────────────────────────────────────
@@ -310,40 +366,56 @@ export function mountConsentUI(options) {
   const buildDialog = (checked) => {
     const m = current.messages;
     const shade = decorate(el('div', 'dlc-overlay'));
-    const dialog = el('div', 'dlc-dialog', { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dlc-settings-title' });
+    const dialog = el('div', 'dlc-dialog', {
+      role: 'dialog',
+      'aria-modal': 'true',
+      'aria-labelledby': 'dlc-settings-title',
+      'aria-describedby': 'dlc-settings-intro',
+    });
     const head = el('div', 'dlc-head');
-    head.append(text(el('h2', 'dlc-h', { id: 'dlc-settings-title' }), m.settingsTitle), closeButton(m.close, closeSettings));
+    head.append(
+      text(el('h2', 'dlc-h', { id: 'dlc-settings-title' }), m.settingsTitle),
+      text(el('p', 'dlc-p', { id: 'dlc-settings-intro' }), m.settingsIntro),
+      closeButton(m.close, closeSettings),
+    );
 
     const content = el('div', 'dlc-content');
-    content.appendChild(text(el('p', 'dlc-p'), m.settingsIntro));
+    const cats = el('ul', 'dlc-cats', { role: 'list' });
 
-    const necessary = el('div', 'dlc-cat');
-    const necessaryHead = el('div', 'dlc-cat-head');
-    necessaryHead.append(text(el('h3', 'dlc-h3'), m.necessaryTitle), text(el('span', 'dlc-status'), m.necessaryStatus));
-    necessary.append(necessaryHead, text(el('p', 'dlc-p'), m.necessaryBody));
+    const necessary = el('li', 'dlc-cat');
+    const necessaryCopy = el('div', 'dlc-cat-copy');
+    necessaryCopy.append(text(el('h3', 'dlc-h3'), m.necessaryTitle), text(el('p', 'dlc-p'), m.necessaryBody));
+    necessary.append(necessaryCopy, text(el('span', 'dlc-status'), m.necessaryStatus));
 
-    const analytics = el('div', 'dlc-cat');
-    const analyticsHead = el('div', 'dlc-cat-head');
+    const analytics = el('li', 'dlc-cat');
+    const analyticsCopy = el('div', 'dlc-cat-copy');
+    analyticsCopy.append(
+      text(el('h3', 'dlc-h3'), m.analyticsTitle),
+      text(el('p', 'dlc-p', { id: 'dlc-analytics-body' }), m.analyticsBody),
+    );
     const toggle = el('label', 'dlc-switch');
-    const input = el('input', '', { type: 'checkbox', role: 'switch', id: 'dlc-analytics' });
+    const input = el('input', '', {
+      type: 'checkbox',
+      role: 'switch',
+      id: 'dlc-analytics',
+      'aria-describedby': 'dlc-analytics-body',
+    });
     input.checked = checked;
-    toggle.append(text(el('span'), m.analyticsSwitch), input, el('span', 'dlc-track', { 'aria-hidden': 'true' }));
-    analyticsHead.append(text(el('h3', 'dlc-h3'), m.analyticsTitle), toggle);
-    analytics.append(analyticsHead, text(el('p', 'dlc-p'), m.analyticsBody));
+    toggle.append(text(el('span', 'dlc-sr'), m.analyticsSwitch), input, el('span', 'dlc-track', { 'aria-hidden': 'true' }));
+    analytics.append(analyticsCopy, toggle);
 
-    const more = el('p', 'dlc-p');
-    more.appendChild(privacyLink());
-    content.append(necessary, analytics, more);
+    cats.append(necessary, analytics);
+    const policy = el('p', 'dlc-p');
+    policy.appendChild(link(privacyHref(current.lang), m.privacyLink));
+    content.append(cats, policy);
 
     const foot = el('div', 'dlc-foot');
-    const after = (fn) => () => {
-      fn();
-      closeSettings();
-    };
     foot.append(
-      button(m.rejectAll, after(() => decide('reject'))),
-      button(m.acceptAll, after(() => decide('accept'))),
-      button(m.save, after(() => decide(input.checked))),
+      button(m.cancel, closeSettings),
+      button(m.save, () => {
+        decide(input.checked);
+        closeSettings();
+      }),
     );
 
     dialog.append(head, content, foot);
@@ -420,9 +492,9 @@ export function mountConsentUI(options) {
   });
   manager.bindTriggers();
   doc.addEventListener('click', (event) => {
-    const link = event.target?.closest?.('a[href]');
-    if (!link || link.hasAttribute('data-consent-settings')) return;
-    const href = link.getAttribute('href') || '';
+    const anchor = event.target?.closest?.('a[href]');
+    if (!anchor || anchor.hasAttribute('data-consent-settings')) return;
+    const href = anchor.getAttribute('href') || '';
     if (href !== '#cookie-settings' && !href.endsWith(`${win.location.pathname}#cookie-settings`)) return;
     event.preventDefault();
     openSettings();

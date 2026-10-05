@@ -12,11 +12,12 @@
 import { createConsentManager } from './site-kit-consent.js';
 import { mountConsentUI } from './consent-ui.js';
 import { consentMessagesFor } from './messages.js';
-import { GTM_ID, MEASUREMENT_IDS, POLICY_VERSION, privacyHref } from './config.js';
+import { GTM_ID, MEASUREMENT_IDS, POLICY_VERSION, learnMoreHref, privacyHref } from './config.js';
 
 mountConsentUI({
   manager: createConsentManager({ policyVersion: POLICY_VERSION, gtm: GTM_ID, measurementIds: MEASUREMENT_IDS }),
   messagesFor: consentMessagesFor,
+  learnMoreHref,
   privacyHref,
   footerTrigger: true,
 });

@@ -56,6 +56,16 @@ cookies, and no `<noscript>` iframe.
   bar and settings dialog (consent-ui.js, messages.js — byte-identical copies
   of devslab.kr's src/consent/consent-ui.mjs and messages.mjs, 14 locales;
   change both repos together), and the hub's settings in config.js.
+- The bar is short (site-kit 0.17.0, owner decision 2026-10-06): what is
+  collected, why, and that it is optional, then "자세히 보기" — a link to
+  devslab.kr/privacy at the section that carries the full disclosure (Google
+  Analytics 4, Google LLC, the transfer to the United States, 14 months, no
+  ads, how to withdraw): `#processors`, section 5. That link is
+  `learnMoreHref` in config.js; it must keep its #anchor (the bar refuses to
+  mount without one) and use the same section id devslab.kr's own bar links
+  to (its `CONSENT_LEARN_MORE_SECTION`). The settings dialog shows
+  necessary and analytics one line each, a policy link, and two equal
+  buttons, 취소 and 선택 저장.
 - The footer's "쿠키 설정" link reopens the settings to change or withdraw.
 - There is no backend, so the proof of a decision is the cookie on the
   visitor's device; the shared policy at devslab.kr/privacy says so. Bump

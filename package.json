@@ -11,6 +11,6 @@
     "sync:consent": "node scripts/sync-consent.mjs"
   },
   "devDependencies": {
-    "@devslab/site-kit": "0.16.0"
+    "@devslab/site-kit": "^0.17.0"
   }
 }

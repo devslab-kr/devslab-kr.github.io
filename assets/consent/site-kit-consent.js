@@ -1,4 +1,4 @@
-// Vendored from @devslab/site-kit@0.16.0 src/core/consent.mjs by scripts/sync-consent.mjs — do not edit.
+// Vendored from @devslab/site-kit@0.17.0 src/core/consent.mjs by scripts/sync-consent.mjs — do not edit.
 import { GTM_CONTAINER_ID_PATTERN, gtmHeadScript } from "./site-kit-gtm.js";
 
 /**
@@ -519,25 +519,33 @@ export function createConsentManager(options) {
   });
 }
 
-/** Default strings, Korean. Products pass these (or their own) to the banner. */
+/**
+ * Default strings, Korean. Products pass these (or their own) to the banner.
+ * Short on purpose (owner decision, 2026-10-06): the bar says what and why and
+ * that it is optional; "자세히 보기" links to the product's privacy policy,
+ * whose analytics section carries the full disclosure (Google Analytics,
+ * recipient, overseas transfer, retention, no advertising, withdrawal).
+ */
 export const CONSENT_MESSAGES_KO = Object.freeze({
   regionLabel: "쿠키 동의",
-  title: "방문 통계에 쿠키를 써도 될까요?",
-  body: "동의하시면 Google Analytics로 어떤 페이지를 얼마나 보는지 통계를 냅니다. 데이터는 Google LLC(미국)로 전송되어 14개월 동안 보관되고, 광고에는 쓰지 않습니다. 동의하지 않아도 사이트의 모든 기능을 그대로 쓸 수 있고, 바닥글의 ‘쿠키 설정’에서 언제든 바꿀 수 있습니다.",
+  title: "이용 통계 수집 동의 (선택)",
+  body: "서비스를 더 낫게 만들기 위해 이용 통계를 수집합니다. 동의는 선택이며, 동의하지 않아도 모든 기능을 쓸 수 있습니다.",
+  learnMore: "자세히 보기",
   privacyLink: "개인정보처리방침",
   acceptAll: "모두 허용",
   rejectAll: "거부",
   settings: "설정",
   dismiss: "선택하지 않고 닫기",
   settingsTitle: "쿠키 설정",
-  settingsIntro: "필수 쿠키는 사이트가 동작하는 데 필요해 항상 사용합니다. 방문 통계는 동의하실 때만 사용하며, 여기서 언제든 바꾸거나 철회할 수 있습니다.",
+  settingsIntro: "바닥글의 ‘쿠키 설정’에서 언제든 다시 바꿀 수 있습니다.",
   necessaryTitle: "필수",
-  necessaryBody: "서비스 제공과 보안, 법령상 의무를 위해 꼭 필요해 거부할 수 없는 쿠키입니다. 이 선택을 기억하는 쿠키도 여기에 속합니다.",
+  necessaryBody: "사이트가 동작하는 데 꼭 필요해 항상 사용합니다.",
   necessaryStatus: "항상 사용",
-  analyticsTitle: "방문 통계 (선택)",
-  analyticsBody: "Google Analytics 4로 방문한 페이지, 머문 시간, 기기·브라우저 종류를 가명 식별자와 함께 수집해 통계를 냅니다. 받는 곳: Google LLC(미국으로 국외 이전). 보관 기간: 14개월. 광고에는 쓰지 않습니다.",
-  analyticsSwitch: "방문 통계 허용",
+  analyticsTitle: "이용 통계 (선택)",
+  analyticsBody: "서비스를 개선하는 데 쓰는 이용 통계입니다.",
+  analyticsSwitch: "이용 통계 수집 허용",
   save: "선택 저장",
+  cancel: "취소",
   close: "닫기",
   saved: "쿠키 설정을 저장했습니다.",
   trigger: "쿠키 설정",
@@ -546,22 +554,24 @@ export const CONSENT_MESSAGES_KO = Object.freeze({
 /** Default strings, English. */
 export const CONSENT_MESSAGES_EN = Object.freeze({
   regionLabel: "Cookie consent",
-  title: "May we use cookies for visit statistics?",
-  body: "If you agree, Google Analytics counts which pages are viewed and for how long. The data goes to Google LLC in the United States, is kept for 14 months, and is never used for ads. Everything on this site works without it, and you can change your choice at any time under “Cookie settings” in the footer.",
+  title: "Analytics (optional)",
+  body: "We collect usage statistics to improve the service. It's optional, and everything works without it.",
+  learnMore: "Learn more",
   privacyLink: "Privacy policy",
   acceptAll: "Accept all",
   rejectAll: "Reject",
   settings: "Settings",
   dismiss: "Close without choosing",
   settingsTitle: "Cookie settings",
-  settingsIntro: "Necessary cookies keep the site working and are always on. Visit statistics run only with your consent, and you can change or withdraw it here at any time.",
+  settingsIntro: "You can change this at any time under “Cookie settings” in the footer.",
   necessaryTitle: "Necessary",
-  necessaryBody: "Needed to provide the service, keep it secure and meet legal obligations, so they cannot be turned off. The cookie that remembers this choice is one of them.",
+  necessaryBody: "Needed for the site to work, so always on.",
   necessaryStatus: "Always on",
-  analyticsTitle: "Visit statistics (optional)",
-  analyticsBody: "Google Analytics 4 records the pages you view, time spent, and device and browser type under a pseudonymous ID to produce statistics. Recipient: Google LLC (transferred to the United States). Kept for 14 months. Never used for ads.",
-  analyticsSwitch: "Allow visit statistics",
+  analyticsTitle: "Analytics (optional)",
+  analyticsBody: "Usage statistics that help us improve the service.",
+  analyticsSwitch: "Allow analytics",
   save: "Save choices",
+  cancel: "Cancel",
   close: "Close",
   saved: "Your cookie settings are saved.",
   trigger: "Cookie settings",

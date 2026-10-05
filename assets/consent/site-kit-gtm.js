@@ -1,4 +1,4 @@
-// Vendored from @devslab/site-kit@0.16.0 src/core/gtm.mjs by scripts/sync-consent.mjs — do not edit.
+// Vendored from @devslab/site-kit@0.17.0 src/core/gtm.mjs by scripts/sync-consent.mjs — do not edit.
 /**
  * Google Tag Manager, written once for the family sites (D-031).
  *

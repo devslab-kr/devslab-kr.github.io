@@ -14,12 +14,10 @@
  * against the kit on the same cookies. devslab.kr carries the same script
  * (src/utils/gtm.ts) for its own container.
  */
-import { CONSENT_COOKIE_NAME, consentHeadScript } from '@devslab/site-kit';
-
-const MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
+import { CONSENT_COOKIE_NAME, CONSENT_MAX_AGE_SECONDS, consentHeadScript } from '@devslab/site-kit';
 
 export function consentBootScript({ policyVersion, gtm }) {
-  const readGrant = String.raw`var g=false;try{var m=/(?:^|;\s*)${CONSENT_COOKIE_NAME}=([^;]*)/.exec(d.cookie);if(m){var f={},p=m[1].split('&'),i,kv;for(i=0;i<p.length;i++){kv=p[i].split('=');if(kv.length!==2||Object.prototype.hasOwnProperty.call(f,kv[0]))throw 0;f[kv[0]]=kv[1]}var n=Math.floor(Date.now()/1000),t=Number(f.t);g=p.length===4&&f.v==='${policyVersion}'&&f.a==='1'&&/^[1-9][0-9]{0,11}$/.test(f.t||'')&&/^[0-9a-f]{32}$/.test(f.id||'')&&t<=n+600&&n-t<=${MAX_AGE_SECONDS}}}catch(e){g=false}`;
+  const readGrant = String.raw`var g=false;try{var m=/(?:^|;\s*)${CONSENT_COOKIE_NAME}=([^;]*)/.exec(d.cookie);if(m){var f={},p=m[1].split('&'),i,kv;for(i=0;i<p.length;i++){kv=p[i].split('=');if(kv.length!==2||Object.prototype.hasOwnProperty.call(f,kv[0]))throw 0;f[kv[0]]=kv[1]}var n=Math.floor(Date.now()/1000),t=Number(f.t);g=p.length===4&&f.v==='${policyVersion}'&&f.a==='1'&&/^[1-9][0-9]{0,11}$/.test(f.t||'')&&/^[0-9a-f]{32}$/.test(f.id||'')&&t<=n+600&&n-t<=${CONSENT_MAX_AGE_SECONDS}}}catch(e){g=false}`;
   return `(function(w,d){${readGrant}
 if(g){${consentHeadScript({ granted: true, gtm })}
 }else{${consentHeadScript()}}})(window,document);`;
