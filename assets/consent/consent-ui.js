@@ -1,6 +1,11 @@
 /**
  * The cookie consent bar and its settings dialog, framework-free.
  *
+ * Below 35rem the three choices stack in one column, still equal in size, so
+ * no language has to break a label mid-word (German, Spanish, Portuguese,
+ * Hindi at 390px); from 35rem they sit in one row — the bar by viewport
+ * width, the dialog footer by the dialog's own width (a container query).
+ *
  * Behaviour comes from @devslab/site-kit's createConsentManager (D-034):
  * nothing that contacts Google runs until the visitor grants analytics for
  * the current policy version. This file is only the markup the kit leaves to
@@ -48,8 +53,9 @@ const STYLE = `
 .dlc-body,.dlc-p{margin:0;color:var(--dlc-muted)}
 .dlc a.dlc-link{color:var(--dlc-accent);text-decoration:underline;text-underline-offset:2px;font-weight:500}
 .dlc a.dlc-link:hover{text-decoration-thickness:2px}
-.dlc-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
-.dlc-btn{appearance:none;margin:0;min-height:40px;padding:8px 12px;border:1px solid var(--dlc-btn-line);border-radius:8px;background:var(--dlc-btn);color:var(--dlc-fg);font:inherit;font-weight:600;line-height:1.25;white-space:normal;cursor:pointer;transition:border-color .15s,background-color .15s,color .15s}
+.dlc-actions,.dlc-foot{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:stretch}
+@media (min-width:35rem){.dlc-actions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.dlc-btn{appearance:none;overflow-wrap:normal;word-break:keep-all;hyphens:none;margin:0;min-height:40px;padding:8px 12px;border:1px solid var(--dlc-btn-line);border-radius:8px;background:var(--dlc-btn);color:var(--dlc-fg);font:inherit;font-weight:600;line-height:1.25;white-space:normal;cursor:pointer;transition:border-color .15s,background-color .15s,color .15s}
 .dlc-btn:hover{border-color:var(--dlc-accent);color:var(--dlc-accent)}
 .dlc-btn:active{background:var(--dlc-soft)}
 .dlc-btn:focus-visible,.dlc-x:focus-visible,.dlc a.dlc-link:focus-visible,.dlc-switch input:focus-visible+.dlc-track{outline:2px solid var(--dlc-ring);outline-offset:2px}
@@ -63,7 +69,7 @@ const STYLE = `
 .dlc-bar .dlc-copy{padding-inline-end:24px}
 }
 .dlc-overlay{position:fixed;inset:0;z-index:2147483001;display:grid;place-items:center;padding:16px;background:rgba(9,9,11,.55)}
-.dlc-dialog{position:relative;display:flex;flex-direction:column;width:100%;max-width:34rem;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);background:var(--dlc-bg);border:1px solid var(--dlc-line);border-radius:12px;box-shadow:var(--dlc-shadow)}
+.dlc-dialog{position:relative;display:flex;flex-direction:column;width:100%;max-width:40rem;container-type:inline-size;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);background:var(--dlc-bg);border:1px solid var(--dlc-line);border-radius:12px;box-shadow:var(--dlc-shadow)}
 .dlc-head{position:relative;padding:20px 56px 12px 24px;padding-inline:24px 56px;border-bottom:1px solid var(--dlc-line)}
 .dlc-head .dlc-x{top:14px;inset-inline-end:12px}
 .dlc-h{margin:0;font-size:17px;font-weight:600;line-height:1.4;color:var(--dlc-fg)}
@@ -79,7 +85,8 @@ const STYLE = `
 .dlc-switch input:checked+.dlc-track{background:var(--dlc-accent)}
 .dlc-switch input:checked+.dlc-track::after{transform:translateX(20px)}
 .dlc[dir=rtl] .dlc-switch input:checked+.dlc-track::after{transform:translateX(-20px)}
-.dlc-foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 24px 20px;border-top:1px solid var(--dlc-line)}
+.dlc-foot{padding:12px 24px 20px;border-top:1px solid var(--dlc-line)}
+@container (min-width:35rem){.dlc-foot{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .dlc-toast{position:fixed;z-index:2147483002;bottom:16px;inset-inline:16px;max-width:24rem;margin-inline:auto;padding:10px 16px;border:1px solid var(--dlc-line);border-radius:10px;background:var(--dlc-bg);box-shadow:var(--dlc-shadow);font-weight:500;text-align:center}
 .dlc-toast:empty{display:none}
 @media (prefers-reduced-motion:reduce){.dlc *{transition:none!important}}
