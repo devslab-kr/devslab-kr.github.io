@@ -46,12 +46,12 @@ n&&j.setAttribute('nonce',n.nonce||n.getAttribute('nonce'));f.parentNode.insertB
     <link rel="icon" href="assets/oss-brand/editor-ruler/favicon.svg" type="image/svg+xml" />
     <link rel="alternate icon" href="assets/oss-brand/editor-ruler/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="assets/oss-brand/editor-ruler/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Geist / Geist Mono are self-hosted (npm run sync:fonts): a Google
+         Fonts stylesheet would reach Google LLC before the consent bar is
+         answered. The two Basic Latin files every locale draws load first. -->
+    <link rel="preload" href="/assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/assets/fonts/fonts.css" />
     <!-- Locale negotiation: our own library, so the mainland-Simplified
          case is handled the same way here as in every other devslab
          surface. Loaded from a CDN because this page has no build step;

@@ -103,6 +103,54 @@ for (const page of pages) {
   });
 }
 
+// Every host a page or stylesheet names in a URL (https://, http:// or
+// protocol-relative //), lower-cased, Google's kept. "google" covers
+// googleapis, googletagmanager, google-analytics and googleusercontent.
+const googleHosts = (text) =>
+  [...text.matchAll(/(?:https?:)?\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)/gi)]
+    .map((m) => m[1].toLowerCase())
+    .filter((host) => /google|gstatic|doubleclick/.test(host));
+
+test('the Google host scan sees fonts, preconnects and Tag Manager', () => {
+  assert.deepEqual(
+    googleHosts('<link rel="preconnect" href="https://fonts.googleapis.com" /><link href="//fonts.gstatic.com/s/x.woff2"> url(https://www.googletagmanager.com/gtm.js) @import "http://stats.g.doubleclick.net/x";'),
+    ['fonts.googleapis.com', 'fonts.gstatic.com', 'www.googletagmanager.com', 'stats.g.doubleclick.net'],
+  );
+  assert.deepEqual(googleHosts('<meta name="google-site-verification" content="x" /> // a comment'), [], 'a meta name is not a request');
+});
+
+// The shared policy says nothing reaches Google before a grant or after a
+// refusal. A webfont stylesheet from fonts.googleapis.com sends the visitor's
+// address to Google LLC on every visit, so the only Google host a page may
+// name is Tag Manager's, inside the boot script that loads it on a grant.
+for (const page of pages) {
+  const name = relative(root, page).replaceAll('\\', '/');
+  test(`${name} names no Google host outside the consent-gated loader`, () => {
+    const html = readFileSync(page, 'utf8');
+    const blocks = html.match(/<!-- consent:start -->[\s\S]*?<!-- consent:end -->/g) ?? [];
+    assert.equal(blocks.length, 1, 'one consent block');
+    assert.deepEqual([...new Set(googleHosts(blocks[0]))], ['www.googletagmanager.com'], 'the block loads Tag Manager and nothing else of Google’s');
+    assert.deepEqual(googleHosts(html.replace(blocks[0], '')), [], 'no Google host anywhere else on the page');
+  });
+}
+
+function filesEndingWith(dir, ext) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (SKIP.has(entry.name)) return [];
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return filesEndingWith(path, ext);
+    return entry.name.endsWith(ext) ? [path] : [];
+  });
+}
+
+test('no stylesheet the hub serves names a Google host (no @import or url() to Google Fonts)', () => {
+  const sheets = filesEndingWith(root, '.css');
+  assert.ok(sheets.length > 0, 'the walk found the hub’s stylesheets');
+  for (const sheet of sheets) {
+    assert.deepEqual(googleHosts(readFileSync(sheet, 'utf8')), [], relative(root, sheet));
+  }
+});
+
 test('index.html loads the consent bar and has a footer control for it', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
