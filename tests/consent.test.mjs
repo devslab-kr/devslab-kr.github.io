@@ -4,10 +4,12 @@ import { join, relative } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
+import * as kit from '@devslab/site-kit';
 import { CONSENT_MESSAGES_EN, CONSENT_MESSAGES_KO, readConsentCookie } from '@devslab/site-kit';
 import { consentBootScript } from '../scripts/consent-boot.mjs';
-import { GTM_ID, MEASUREMENT_IDS, POLICY_VERSION, privacyHref } from '../assets/consent/config.js';
+import { GTM_ID, LEARN_MORE_SECTION, MEASUREMENT_IDS, POLICY_VERSION, learnMoreHref, privacyHref } from '../assets/consent/config.js';
 import { CONSENT_MESSAGES, consentMessagesFor } from '../assets/consent/messages.js';
+import { mountConsentUI } from '../assets/consent/consent-ui.js';
 
 const CONTAINER = 'GTM-5WGTTWSF';
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -32,6 +34,54 @@ test('the hub config names this container and its GA4 stream', () => {
   assert.equal(privacyHref('ar'), 'https://devslab.kr/privacy/?lang=ar#cookies');
 });
 
+// The kit's ConsentBanner rule for learnMoreHref (site-kit 0.17.0): one #anchor, no spaces.
+const ANCHORED_HREF = /^[^#\s]*#[^#\s]+$/;
+
+test('"자세히 보기" opens the shared policy at the section devslab.kr’s bar opens, in the reader’s language', () => {
+  // devslab.kr's CONSENT_LEARN_MORE_SECTION: 5, processing and transfers
+  // abroad, whose Google LLC card carries the full analytics disclosure. Its
+  // privacy-page test pins that the id exists in both the Korean and English
+  // policy and says all of it; this pins that the hub links to the same id.
+  assert.equal(LEARN_MORE_SECTION, 'processors');
+  assert.equal(learnMoreHref('ko'), 'https://devslab.kr/privacy/?lang=ko#processors');
+  for (const lang of Object.keys(CONSENT_MESSAGES)) {
+    const href = learnMoreHref(lang);
+    assert.match(href, ANCHORED_HREF, lang);
+    assert.equal(new URL(href).hash, `#${LEARN_MORE_SECTION}`, lang);
+    assert.equal(new URL(href).searchParams.get('lang'), lang, lang);
+  }
+});
+
+// The checks run before the bar touches the DOM, so a stub window is enough.
+function mountWith(options) {
+  const previous = globalThis.window;
+  const started = [];
+  globalThis.window = { document: { documentElement: { lang: 'ko' } } };
+  try {
+    mountConsentUI({
+      manager: { start: () => { started.push(true); throw new Error('started'); } },
+      messagesFor: consentMessagesFor,
+      privacyHref,
+      ...options,
+    });
+  } catch (error) {
+    return { error, started: started.length > 0 };
+  } finally {
+    globalThis.window = previous;
+  }
+  return { error: null, started: started.length > 0 };
+}
+
+test('the bar refuses a "자세히 보기" without its #anchor, before anything starts', () => {
+  for (const learnMore of [undefined, () => 'https://devslab.kr/privacy/', () => 'https://devslab.kr/privacy/#', () => '#a b']) {
+    const run = mountWith({ learnMoreHref: learnMore });
+    assert.ok(run.error instanceof RangeError, `${learnMore}: ${run.error}`);
+    assert.equal(run.started, false, 'the consent manager never started');
+  }
+  const ok = mountWith({ learnMoreHref });
+  assert.equal(ok.error?.message, 'started', 'with the hub’s href the mount goes on to start the manager');
+});
+
 test('the walk finds the hub and its move pages', () => {
   const found = pages.map((p) => relative(root, p).replaceAll('\\', '/')).sort();
   for (const expected of ['index.html', 'gitlinq/index.html', 'gitlinq/docs/index.html']) {
@@ -52,6 +102,54 @@ for (const page of pages) {
     assert.match(afterCharset, /^\s*<!-- consent:start -->\s*<script>\(function\(w,d\)\{/, 'first thing after <meta charset>');
   });
 }
+
+// Every host a page or stylesheet names in a URL (https://, http:// or
+// protocol-relative //), lower-cased, Google's kept. "google" covers
+// googleapis, googletagmanager, google-analytics and googleusercontent.
+const googleHosts = (text) =>
+  [...text.matchAll(/(?:https?:)?\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)/gi)]
+    .map((m) => m[1].toLowerCase())
+    .filter((host) => /google|gstatic|doubleclick/.test(host));
+
+test('the Google host scan sees fonts, preconnects and Tag Manager', () => {
+  assert.deepEqual(
+    googleHosts('<link rel="preconnect" href="https://fonts.googleapis.com" /><link href="//fonts.gstatic.com/s/x.woff2"> url(https://www.googletagmanager.com/gtm.js) @import "http://stats.g.doubleclick.net/x";'),
+    ['fonts.googleapis.com', 'fonts.gstatic.com', 'www.googletagmanager.com', 'stats.g.doubleclick.net'],
+  );
+  assert.deepEqual(googleHosts('<meta name="google-site-verification" content="x" /> // a comment'), [], 'a meta name is not a request');
+});
+
+// The shared policy says nothing reaches Google before a grant or after a
+// refusal. A webfont stylesheet from fonts.googleapis.com sends the visitor's
+// address to Google LLC on every visit, so the only Google host a page may
+// name is Tag Manager's, inside the boot script that loads it on a grant.
+for (const page of pages) {
+  const name = relative(root, page).replaceAll('\\', '/');
+  test(`${name} names no Google host outside the consent-gated loader`, () => {
+    const html = readFileSync(page, 'utf8');
+    const blocks = html.match(/<!-- consent:start -->[\s\S]*?<!-- consent:end -->/g) ?? [];
+    assert.equal(blocks.length, 1, 'one consent block');
+    assert.deepEqual([...new Set(googleHosts(blocks[0]))], ['www.googletagmanager.com'], 'the block loads Tag Manager and nothing else of Google’s');
+    assert.deepEqual(googleHosts(html.replace(blocks[0], '')), [], 'no Google host anywhere else on the page');
+  });
+}
+
+function filesEndingWith(dir, ext) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (SKIP.has(entry.name)) return [];
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return filesEndingWith(path, ext);
+    return entry.name.endsWith(ext) ? [path] : [];
+  });
+}
+
+test('no stylesheet the hub serves names a Google host (no @import or url() to Google Fonts)', () => {
+  const sheets = filesEndingWith(root, '.css');
+  assert.ok(sheets.length > 0, 'the walk found the hub’s stylesheets');
+  for (const sheet of sheets) {
+    assert.deepEqual(googleHosts(readFileSync(sheet, 'utf8')), [], relative(root, sheet));
+  }
+});
 
 test('index.html loads the consent bar and has a footer control for it', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
@@ -117,19 +215,47 @@ test('the bar strings: ko/en are the kit’s, all fourteen hub locales filled', 
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const supported = JSON.parse(html.match(/var SUPPORTED = (\[[^\]]+\]);/)[1].replaceAll("'", '"'));
   assert.deepEqual(Object.keys(CONSENT_MESSAGES).sort(), [...supported].sort());
+  const keys = Object.keys(CONSENT_MESSAGES_KO).sort();
   for (const lang of supported) {
     const m = consentMessagesFor(lang).messages;
-    assert.ok(m.body.includes(m.trigger), `${lang}: the body names the footer control`);
+    assert.deepEqual(Object.keys(m).sort(), keys, `${lang}: the kit's keys, learnMore and cancel included`);
+    assert.ok(m.settingsIntro.includes(m.trigger), `${lang}: the settings intro names the footer control`);
     for (const value of Object.values(m)) assert.ok(value.trim() && !/[§↗]/.test(value), `${lang}: ${value}`);
+    // Short copy: the recipient, country and retention period live in the policy's analytics section, not here.
+    for (const value of Object.values(m)) assert.ok(!/Google|LLC|14/.test(value), `${lang}: ${value}`);
   }
 });
 
-test('the vendored site-kit consent module is the pinned kit version', () => {
-  const pinned = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).devDependencies['@devslab/site-kit'];
+test('the vendored site-kit consent module is the installed kit version, which package.json pins', () => {
+  const range = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).devDependencies['@devslab/site-kit'];
+  const kitDir = join(fileURLToPath(import.meta.resolve('@devslab/site-kit')), '..', '..', '..');
+  const installed = JSON.parse(readFileSync(join(kitDir, 'package.json'), 'utf8')).version;
+  assert.equal(range, `^${installed}`, 'package.json pins the installed kit at its own caret range');
   for (const file of ['site-kit-consent.js', 'site-kit-gtm.js']) {
     const first = readFileSync(join(root, 'assets/consent', file), 'utf8').split('\n')[0];
-    assert.ok(first.includes(`@devslab/site-kit@${pinned} `), `${file}: ${first}`);
+    assert.ok(first.includes(`@devslab/site-kit@${installed} `), `${file}: ${first}`);
   }
+});
+
+// Every value the hub's own code imports from the kit, found by reading the
+// import statements, exists at runtime: 0.16.0's entry declared consent
+// exports its runtime did not have (CONSENT_RECORD_MAX_BYTES and others).
+test('every name the hub imports from @devslab/site-kit is a real runtime export', () => {
+  const sources = ['scripts', 'tests'].flatMap((dir) =>
+    readdirSync(join(root, dir)).filter((f) => f.endsWith('.mjs')).map((f) => join(root, dir, f)),
+  );
+  const names = new Set();
+  for (const file of sources) {
+    const code = readFileSync(file, 'utf8');
+    for (const match of code.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@devslab\/site-kit['"]/g)) {
+      for (const name of match[1].split(',').map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean)) names.add(name);
+    }
+  }
+  for (const expected of ['CONSENT_COOKIE_NAME', 'CONSENT_MAX_AGE_SECONDS', 'consentHeadScript', 'readConsentCookie']) {
+    assert.ok(names.has(expected), `${expected} is among the imports found`);
+  }
+  for (const name of names) assert.notEqual(kit[name], undefined, `${name} exists at runtime`);
+  assert.equal(kit.CONSENT_MAX_AGE_SECONDS, 365 * 24 * 60 * 60, 'the boot script’s twelve months');
 });
 
 test('the hub footer links the company privacy policy in every hub locale', () => {
