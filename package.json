@@ -5,11 +5,12 @@
   "scripts": {
     "generate:brand-manifest": "node scripts/generate-oss-brand-manifest.mjs",
     "sync:brand": "node scripts/sync-oss-brand.mjs",
-    "test": "node scripts/build-publisher.mjs --check && node --test tests/*.test.mjs",
+    "test": "node scripts/build-publisher.mjs --check && node scripts/sync-consent.mjs --check && node --test tests/*.test.mjs",
     "serve": "node scripts/serve.mjs",
-    "build:publisher": "node scripts/build-publisher.mjs"
+    "build:publisher": "node scripts/build-publisher.mjs",
+    "sync:consent": "node scripts/sync-consent.mjs"
   },
   "devDependencies": {
-    "@devslab/site-kit": "0.8.0"
+    "@devslab/site-kit": "0.16.0"
   }
 }
