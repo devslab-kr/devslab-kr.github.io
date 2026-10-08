@@ -3,7 +3,8 @@
   "sourceRepository": "https://github.com/devslab-kr/oss-brand",
   "sourceCommit": "3870b9ea86f5ccc443d06b49d991592591b110da",
   "sourcePullRequest": "https://github.com/devslab-kr/oss-brand/pull/4",
-  "candidateVersion": "0.4.0",
+  "version": "0.4.0",
+  "release": "https://github.com/devslab-kr/oss-brand/releases/tag/v0.4.0",
   "files": [
     {
       "path": "project-mark.svg",

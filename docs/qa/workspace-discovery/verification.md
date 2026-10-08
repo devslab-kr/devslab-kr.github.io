@@ -26,4 +26,7 @@ This is local evidence. CI, merge, Pages deployment, and production link checks
 remain release steps. `/workspace/` and `/workspace/demo/` are served by the
 Workspace project Pages site, so they return 404 on the standalone hub local
 server. Publish the Workspace docs/demo and canonical brand release before
-merging/deploying this hub change.
+merging/deploying this hub change. The canonical
+[v0.4.0 brand release](https://github.com/devslab-kr/oss-brand/releases/tag/v0.4.0)
+is now published; Workspace Pages publication and production verification
+remain pending.
