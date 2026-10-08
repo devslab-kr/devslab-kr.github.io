@@ -27,6 +27,14 @@ Run `npm test` to check the hub, redirects, and retained download selection.
 
 ## OSS brand snapshot
 
+Workspace (O13) uses separately vendored light and dark glyphs under
+`assets/workspace/`, pinned by `provenance.json` to the canonical
+[`oss-brand` v0.4.0 candidate](https://github.com/devslab-kr/oss-brand/pull/4).
+The existing v0.3.0 snapshot stays immutable. The Workspace card links to its
+project Pages documentation and demo, GitHub repository, and npm package.
+Publish the canonical brand release and Workspace Pages before deploying this
+discovery card.
+
 This hub vendors the public DevsLab OSS brand release rather than consuming it
 at runtime. The pinned Q-line snapshot is **v0.3.0**, represented by the immutable
 305-file SHA-256 manifest at

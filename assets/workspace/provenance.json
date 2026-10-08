@@ -1,0 +1,19 @@
+{
+  "registryId": "O13",
+  "sourceRepository": "https://github.com/devslab-kr/oss-brand",
+  "sourceCommit": "3870b9ea86f5ccc443d06b49d991592591b110da",
+  "sourcePullRequest": "https://github.com/devslab-kr/oss-brand/pull/4",
+  "candidateVersion": "0.4.0",
+  "files": [
+    {
+      "path": "project-mark.svg",
+      "sourcePath": "dist/workspace/glyph-color.svg",
+      "sha256": "08d9ef467188572abc68de703498412901568e349af21f8dc3583d67378e7069"
+    },
+    {
+      "path": "project-mark-dark.svg",
+      "sourcePath": "dist/workspace/glyph-dark.svg",
+      "sha256": "55ab7ada8a88d5b9f621d9a45b972877ae21c082c6aeb80b32b50c02a34a2418"
+    }
+  ]
+}
