@@ -1,9 +1,9 @@
 /**
- * Consent bar and settings strings, 14 locales — the same set devslab.kr and
- * the open-source hub (devslab-kr.github.io) render.
+ * Consent bar and settings strings, including Kannada. Shared by devslab.kr and
+ * the open-source hub (devslab-kr.github.io).
  *
  * Korean and English are @devslab/site-kit's CONSENT_MESSAGES_KO / _EN word
- * for word (a test pins that); the other twelve say the same short things in
+ * for word (a test pins that); the other locales say the same short things in
  * the same neutral tone (owner decision 2026-10-06, DDS D-034): what is
  * collected and why, that it is optional, and a "learn more" link. The full
  * disclosure — Google Analytics 4, Google LLC, the transfer to the United
@@ -139,6 +139,30 @@ export const CONSENT_MESSAGES = Object.freeze({
     close: '關閉',
     saved: '已儲存 Cookie 設定。',
     trigger: 'Cookie 設定',
+  }),
+  kn: Object.freeze({
+    regionLabel: 'ಕುಕೀ ಸಮ್ಮತಿ',
+    title: 'ಬಳಕೆಯ ಅಂಕಿಅಂಶಗಳು (ಐಚ್ಛಿಕ)',
+    body: 'ಸೇವೆಯನ್ನು ಸುಧಾರಿಸಲು ಬಳಕೆಯ ಅಂಕಿಅಂಶಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತೇವೆ. ಇದು ಐಚ್ಛಿಕ. ಒಪ್ಪದಿದ್ದರೂ ಎಲ್ಲ ಸೌಲಭ್ಯಗಳನ್ನು ಬಳಸಬಹುದು.',
+    learnMore: 'ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ',
+    privacyLink: 'ಗೌಪ್ಯತಾ ನೀತಿ',
+    acceptAll: 'ಎಲ್ಲವನ್ನೂ ಒಪ್ಪಿ',
+    rejectAll: 'ನಿರಾಕರಿಸಿ',
+    settings: 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
+    dismiss: 'ಆಯ್ಕೆ ಮಾಡದೆ ಮುಚ್ಚಿ',
+    settingsTitle: 'ಕುಕೀ ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
+    settingsIntro: 'ಪುಟದ ಕೆಳಗಿನ “ಕುಕೀ ಸೆಟ್ಟಿಂಗ್‌ಗಳು” ಮೂಲಕ ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಾಯಿಸಬಹುದು.',
+    necessaryTitle: 'ಅಗತ್ಯ',
+    necessaryBody: 'ಸೈಟ್ ಕಾರ್ಯನಿರ್ವಹಿಸಲು ಅಗತ್ಯವಾದ್ದರಿಂದ ಯಾವಾಗಲೂ ಸಕ್ರಿಯವಾಗಿರುತ್ತವೆ.',
+    necessaryStatus: 'ಯಾವಾಗಲೂ ಸಕ್ರಿಯ',
+    analyticsTitle: 'ಬಳಕೆಯ ಅಂಕಿಅಂಶಗಳು (ಐಚ್ಛಿಕ)',
+    analyticsBody: 'ಸೇವೆಯನ್ನು ಸುಧಾರಿಸಲು ನೆರವಾಗುವ ಬಳಕೆಯ ಅಂಕಿಅಂಶಗಳು.',
+    analyticsSwitch: 'ಬಳಕೆಯ ಅಂಕಿಅಂಶ ಸಂಗ್ರಹಕ್ಕೆ ಅನುಮತಿಸಿ',
+    save: 'ಆಯ್ಕೆಗಳನ್ನು ಉಳಿಸಿ',
+    cancel: 'ರದ್ದುಮಾಡಿ',
+    close: 'ಮುಚ್ಚಿ',
+    saved: 'ಕುಕೀ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ.',
+    trigger: 'ಕುಕೀ ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
   }),
   hi: Object.freeze({
     regionLabel: 'कुकी सहमति',
