@@ -209,14 +209,16 @@ for (const [label, cookie] of [
   });
 }
 
-test('the bar strings: ko/en are the kit’s, all fourteen hub locales filled', () => {
+test('the shared bar strings cover every hub locale and Kannada', () => {
   assert.deepEqual(CONSENT_MESSAGES.ko, CONSENT_MESSAGES_KO);
   assert.deepEqual(CONSENT_MESSAGES.en, CONSENT_MESSAGES_EN);
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const supported = JSON.parse(html.match(/var SUPPORTED = (\[[^\]]+\]);/)[1].replaceAll("'", '"'));
-  assert.deepEqual(Object.keys(CONSENT_MESSAGES).sort(), [...supported].sort());
+  assert.deepEqual(Object.keys(CONSENT_MESSAGES).sort(), [...supported, 'kn'].sort());
+  assert.equal(consentMessagesFor('kn-IN').lang, 'kn');
+  assert.equal(consentMessagesFor('KN').lang, 'kn');
   const keys = Object.keys(CONSENT_MESSAGES_KO).sort();
-  for (const lang of supported) {
+  for (const lang of Object.keys(CONSENT_MESSAGES)) {
     const m = consentMessagesFor(lang).messages;
     assert.deepEqual(Object.keys(m).sort(), keys, `${lang}: the kit's keys, learnMore and cancel included`);
     assert.ok(m.settingsIntro.includes(m.trigger), `${lang}: the settings intro names the footer control`);
